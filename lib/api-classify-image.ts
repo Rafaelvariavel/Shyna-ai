@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     if (file.size > MAX_IMAGE_BYTES) return jsonError("A imagem deve ter no máximo 4 MB para respeitar limites de payload da hospedagem.");
     const bytes = Buffer.from(await file.arrayBuffer());
     const base64 = bytes.toString("base64");
-    const model = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+    const model = process.env.GEMINI_MODEL || "gemini-3.5-flash";
     let response: Response;
     try {
       response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {

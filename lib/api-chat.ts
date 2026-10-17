@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     await sql`UPDATE conversations SET updated_at = NOW() WHERE id = ${conversationId} AND user_id = ${user.id}`;
     const history = await sql`SELECT role, content FROM messages WHERE conversation_id = ${conversationId} AND user_id = ${user.id} AND role IN ('user','assistant') ORDER BY created_at DESC LIMIT 20`;
     const messages = (history as Array<{ role: "user" | "assistant"; content: string }>).reverse().map((m) => ({ role: m.role, content: m.content.slice(0, 6000) }));
-    const model = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+    const model = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
     const upstream = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${process.env.GROQ_API}`, "Content-Type": "application/json" },

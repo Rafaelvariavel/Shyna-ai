@@ -48,7 +48,7 @@ Requisitos: Node.js 20.9 ou superior é recomendado. O pacote usa Next.js 16.4.2
 | `GROQ_API` | Chave Groq para chat | Para chat |
 | `GROQ2_API` | Chave Groq opcional para melhorar prompts de imagem | Opcional |
 | `GEMINI_API` | Chave Google Gemini para classificar imagens | Para classificador |
-| `GEMINI_MODEL` | Modelo Gemini disponível para sua chave; padrão no projeto `gemini-3.6-flash` | Opcional |
+| `GEMINI_MODEL` | Modelo Gemini disponível para sua chave; padrão no projeto `gemini-3.5-flash` | Opcional |
 | `GROQ_MODEL` | Modelo habilitado na sua conta Groq | Opcional |
 | `GROQ2_MODEL` | Modelo para a melhoria de prompt | Opcional |
 | `IDIOMAS_API_URL` | URL completa do endpoint da sua API de classificação de idioma | Para idioma |
