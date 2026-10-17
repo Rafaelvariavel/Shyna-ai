@@ -2,6 +2,19 @@
 
 Interface web de IA inspirada na referência visual enviada: tema escuro, barra lateral, busca e histórico de conversas, streaming de respostas, tela de login/cadastro, preferências, termos e política de cookies.
 
+## Estrutura compacta (5 pastas)
+
+```text
+shyna-ai-vercel/
+├── app/                  # Interface e estilos
+│   ├── [slug]/           # Termos e cookies em uma página dinâmica
+│   └── api/
+│       └── [...path]/    # Entrada única que distribui os endpoints
+└── lib/                  # Banco, autenticação, provedores e handlers planos
+```
+
+Os endpoints existentes continuam iguais (`/api/chat`, `/api/images`, `/api/auth/login` etc.), mas são distribuídos por `app/api/[...path]/route.ts`; os handlers ficam como arquivos diretamente em `lib/`. As páginas `/terms` e `/cookies` compartilham `app/[slug]/page.tsx`.
+
 ## Funcionalidades
 
 - Login com nome de usuário e senha (bcrypt, cookie de sessão assinado, `HttpOnly`, `SameSite=Lax`).
@@ -60,7 +73,7 @@ Crie uma chave no [Google AI Studio](https://aistudio.google.com/). O endpoint u
 
 ## 3. Contratos das suas APIs personalizadas
 
-Como você não informou URLs e formatos oficiais de resposta de suas APIs de idioma e imagens, o código usa contratos HTTP configuráveis. Ajuste os adaptadores em `app/api/language/route.ts` e `app/api/images/route.ts` se o seu serviço exigir outro formato.
+Como você não informou URLs e formatos oficiais de resposta de suas APIs de idioma e imagens, o código usa contratos HTTP configuráveis. Ajuste os adaptadores em `lib/api-language.ts` e `lib/api-images.ts` se o seu serviço exigir outro formato.
 
 ### API de classificação de idioma
 

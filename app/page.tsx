@@ -146,7 +146,7 @@ export default function Home() {
   }
 
   async function savePref(patch: Partial<Preferences>) {
-    const next = { theme, improveImagePrompts, ...patch };
+    const next = { theme, improveImagePrompts: improvePrompt, ...patch };
     setTheme(next.theme); setImprovePrompt(next.improveImagePrompts);
     try { await apiJson("/api/preferences", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(next) }); }
     catch (error) { setPageError(error instanceof Error ? error.message : "Não foi possível salvar as preferências."); }
