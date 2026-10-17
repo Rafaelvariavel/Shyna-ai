@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "security:check": "node scripts/security-check.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
