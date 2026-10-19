@@ -14,12 +14,10 @@ cp .env.example .env.local
 
 ## Produção na Vercel
 
-Cadastre cada variável em **Project Settings → Environment Variables**, nos ambientes Production, Preview e Development conforme necessário. Nunca use o prefixo `NEXT_PUBLIC_` nas chaves de IA, banco ou sessão.
+Cadastre cada variável em **Project Settings → Environment Variables**, nos ambientes Production, Preview e Development conforme necessário. Nunca use o prefixo `NEXT_PUBLIC_` nas chaves de IA.
 
 As variáveis mínimas são:
 
-- `DATABASE_URL` ou `NEON`
-- `SESSION_SECRET`
 - `GROQ_API`
 - `GROQ_MODEL`
 - `GEMINI_API`
