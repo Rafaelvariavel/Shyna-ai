@@ -1,7 +1,7 @@
 # Shyna AI — projeto para Vercel
 
 
-Interface web de IA inspirada na referência visual enviada: tema escuro, barra lateral, busca e histórico de conversas, streaming de respostas, tela de login/cadastro, preferências, termos e política de cookies.
+Interface web de IA inspirada na referência visual enviada: tema escuro, barra lateral, busca e histórico de conversas, streaming de respostas, acesso direto sem login, preferências, termos e política de cookies.
 
 ## Estrutura compacta (5 pastas)
 
@@ -11,20 +11,20 @@ shyna-ai-vercel/
 │   ├── [slug]/           # Termos e cookies em uma página dinâmica
 │   └── api/
 │       └── [...path]/    # Entrada única que distribui os endpoints
-└── lib/                  # Banco, autenticação, provedores e handlers planos
+└── lib/                  # Identificador local, provedores e handlers de API
 ```
 
-Os endpoints existentes continuam iguais (`/api/chat`, `/api/images`, `/api/auth/login` etc.), mas são distribuídos por `app/api/[...path]/route.ts`; os handlers ficam como arquivos diretamente em `lib/`. As páginas `/terms` e `/cookies` compartilham `app/[slug]/page.tsx`.
+Os endpoints do app (`/api/chat`, `/api/images` etc.) são distribuídos por `app/api/[...path]/route.ts`; os handlers ficam diretamente em `lib/`. Não existem endpoints de login ou cadastro. As páginas `/terms` e `/cookies` compartilham `app/[slug]/page.tsx`.
 
 ## Funcionalidades
 
-- Login com nome de usuário e senha (bcrypt, cookie de sessão assinado, `HttpOnly`, `SameSite=Lax`).
-- Chat Groq com resposta em streaming (SSE) e histórico no Neon.
+- Acesso direto, sem conta, senha ou sistema de login; um identificador aleatório do navegador separa os históricos por navegador.
+- Chat Groq com resposta em streaming (SSE) e histórico no armazenamento local do navegador.
 - Melhoria opcional de prompts de imagem via `GROQ2_API`.
 - Classificação/descrição de imagens via Gemini (`GEMINI_API`).
 - Classificação de idioma por API externa configurável.
 - Geração de imagem por API externa configurável.
-- Preferências de tema e melhoria de prompts salvas no Neon.
+- Preferências de tema e melhoria de prompts salvas no armazenamento local do navegador.
 - Exclusão individual ou limpeza de todas as conversas.
 - Tratamento de erros, limites simples por usuário/IP, validação de entradas e limite de upload de imagem.
 - Nenhuma chave de provedor é enviada deliberadamente ao navegador; variáveis secretas devem ser configuradas apenas no servidor.
@@ -44,8 +44,6 @@ Requisitos: Node.js 20.9 ou superior é recomendado. O pacote usa Next.js 16.4.2
 
 | Variável | Para que serve | Obrigatória? |
 |---|---|---|
-| `NEON` **ou** `DATABASE_URL` | Connection string PostgreSQL do Neon | Sim |
-| `SESSION_SECRET` | Segredo aleatório de pelo menos 32 caracteres para assinar sessões | Sim |
 | `GROQ_API` | Chave Groq para chat | Para chat |
 | `GROQ2_API` | Chave Groq opcional para melhorar prompts de imagem | Opcional |
 | `GEMINI_API` | Chave Google Gemini para classificar imagens | Para classificador |
@@ -58,11 +56,9 @@ Requisitos: Node.js 20.9 ou superior é recomendado. O pacote usa Next.js 16.4.2
 | `IMAGENS_API` | Token/chave dessa API; também aceita uma URL completa em vez de URL + chave | Se exigido pelo endpoint |
 | `APP_URL` | URL pública (informativa para a implantação futura) | Opcional |
 
-Gere `SESSION_SECRET` localmente com `openssl rand -base64 48` ou um gerador confiável de segredos. Não use o exemplo literal.
+### Histórico e preferências locais
 
-### Neon
-
-Crie um projeto PostgreSQL em [Neon](https://neon.tech/), copie a connection string e salve em `NEON` ou `DATABASE_URL`. O app cria as tabelas na primeira requisição. O SQL equivalente também está em `schema.sql` para execução manual no SQL Editor do Neon.
+Histórico de conversas e preferências são guardados no `localStorage` do navegador. O app não exige banco de dados e não envia conversas antigas para armazenamento remoto; o chat recebe apenas o contexto recente incluído na solicitação atual. Os dados podem desaparecer se o navegador for limpo ou se o usuário trocar de dispositivo.
 
 ### Groq
 
@@ -90,7 +86,7 @@ Como você não informou URLs e formatos oficiais de resposta de suas APIs de id
 - Corpo: `{"prompt":"descrição da imagem"}`.
 - Resposta recomendada: `{"url":"https://seu-servidor/imagens/resultado.png"}`.
 - Também reconhece `image_url`, `imageUrl`, `output_url`, `result.url`, `data.url`, `data[0].url`, `images[0].url` e `b64_json`.
-- Para poupar armazenamento e acelerar o histórico, prefira devolver uma URL pública/assinada da imagem em vez de base64. Respostas de job assíncrono (`job_id`, `task_id`) são detectadas, mas ainda exigem implementar o endpoint de consulta/polling específico do seu provedor.
+- Como o histórico fica no navegador, prefira devolver uma URL pública/assinada da imagem em vez de base64; imagens em base64 são exibidas somente na sessão atual. Respostas de job assíncrono (`job_id`, `task_id`) são detectadas, mas ainda exigem implementar o endpoint de consulta/polling específico do seu provedor.
 
 ### Melhoria de prompts
 
@@ -108,9 +104,8 @@ Preencha `.env.local` com chaves reais. Não publique `.env.local` nem faça com
 
 ## 5. Segurança e limitações importantes
 
-- A senha é armazenada como hash bcrypt, nunca como texto puro.
-- Cookies de sessão são `HttpOnly`, `SameSite=Lax`, `Secure` em produção e expiram em sete dias.
-- Os limites em memória ajudam contra abuso casual, mas em funções serverless não são globais nem persistentes. Antes de um lançamento amplo, implemente rate limiting distribuído (por exemplo, via Redis/Upstash ou tabela de limites no Postgres), verificação de e-mail/recuperação de conta, exclusão de conta e monitoramento de custo.
+- Não há login, senha ou cookie de autenticação. O identificador anônimo do navegador separa históricos, mas não substitui autenticação para dados confidenciais.
+- Os limites em memória ajudam contra abuso casual, mas em funções serverless não são globais nem persistentes. Antes de um lançamento amplo, implemente rate limiting distribuído (por exemplo, via um serviço de limites dedicado), controles antiabuso e monitoramento de custo.
 - Configure limites e orçamento nos painéis dos provedores. O protótipo não promete cotas gratuitas nem controla cobrança feita por serviços externos.
 - As conversas enviadas a modelos externos são processadas por esses provedores. Revise suas políticas e não envie dados sensíveis.
 - Termos e política de cookies são modelos técnicos iniciais, não aconselhamento jurídico. Atualize com identidade do controlador, contato, prazos de retenção e práticas reais antes de abrir ao público.
@@ -119,3 +114,8 @@ Preencha `.env.local` com chaves reais. Não publique `.env.local` nem faça com
 ## 6. Verificação de compatibilidade das APIs
 
 Este pacote não consegue validar as suas chaves privadas nem inventar o contrato real das APIs `IDIOMAS_API`/`IMAGENS_API`. Depois do deploy, teste cada recurso separadamente. Erros da API externa aparecem em linguagem simplificada no app; logs detalhados não devem conter chaves nem senhas.
+
+
+## Créditos
+
+Interface criada por **Studio Lite Supremo**.
