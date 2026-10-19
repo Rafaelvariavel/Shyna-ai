@@ -1,5 +1,6 @@
 # Shyna AI — projeto para Vercel
 
+
 Interface web de IA inspirada na referência visual enviada: tema escuro, barra lateral, busca e histórico de conversas, streaming de respostas, tela de login/cadastro, preferências, termos e política de cookies.
 
 ## Estrutura compacta (5 pastas)
