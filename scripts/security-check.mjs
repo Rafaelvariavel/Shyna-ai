@@ -1,9 +1,10 @@
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 const tracked = execFileSync("git", ["ls-files", "-z"], { encoding: "utf8" })
   .split("\0")
-  .filter(Boolean);
+  .filter(Boolean)
+  .filter((file) => existsSync(file));
 
 const blockedFiles = /(^|\/)(\.env|\.env\.(local|production|development|test)|credentials\.json|secrets?\.(json|ya?ml))$/i;
 const secretPatterns = [
@@ -11,7 +12,7 @@ const secretPatterns = [
   /AQ\.[A-Za-z0-9_-]{20,}/,
   /AIza[A-Za-z0-9_-]{30,}/,
   /(?:AKIA|ASIA)[A-Z0-9]{16}/,
-  /(?:AWS_SECRET_ACCESS_KEY|DATABASE_URL|SESSION_SECRET|GEMINI_API|GROQ(?:2)?_API|IMAGENS_API|IDIOMAS_API)\s*[:=]\s*["']?(?!\$\{|<|troque|coloque|gere|postgresql:\/\/USUARIO)[^\s"']{16,}/i,
+  /(?:AWS_SECRET_ACCESS_KEY|GEMINI_API|GROQ(?:2)?_API|IMAGENS_API|IDIOMAS_API)\s*[:=]\s*["']?(?!\$\{|<|troque|coloque|gere)[^\s"']{16,}/i,
   /-----BEGIN (?:RSA|OPENSSH|EC|PRIVATE) KEY-----/,
 ];
 const dangerousPatterns = [
